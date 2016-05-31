@@ -44,6 +44,8 @@
 El siguiente documento contiene la información referente a la práctica 2 de la asignatura de Algoritmia básica. El objetivo de esta es calcular el coste entendido como inserciones, borrados o cambios de letras en una cadena para crear un palindromo. Las siguientes lineas exponen la estrategia seguida para su desarrollo asi como las decisiones tomadas. El código ha sido desarrollado por el propio autor de este documento.
 
 En el documento se usa $len(x)$ para hacer referencia a la longitud de $x$.
+
+El código se encuentra disponible de manera abierta en : {\url{https://github.com/mlagunas/Palindrome_creation}}
 \end{abstract}
 
 %-------------------------------------------------------------------------
