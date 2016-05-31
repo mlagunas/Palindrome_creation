@@ -1,0 +1,53 @@
+This is BibTeX, Version 0.99d (TeX Live 2013/Debian)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: template-ceig2016-sub.aux
+The style file: eg-alpha-doi.bst
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=20001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: egbibsample.bib
+Warning--I didn't find a database entry for "distancia"
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+You've used 1 entry,
+            3585 wiz_defined-function locations,
+            743 strings with 5845 characters,
+and the built_in function-call counts, 344 in all, are:
+= -- 32
+> -- 2
+< -- 0
++ -- 0
+- -- 0
+* -- 16
+:= -- 69
+add.period$ -- 2
+call.type$ -- 1
+change.case$ -- 4
+chr.to.int$ -- 1
+cite$ -- 1
+duplicate$ -- 13
+empty$ -- 35
+format.name$ -- 0
+if$ -- 84
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 0
+newline$ -- 8
+num.names$ -- 0
+pop$ -- 10
+preamble$ -- 1
+purify$ -- 6
+quote$ -- 0
+skip$ -- 22
+stack$ -- 0
+substring$ -- 9
+swap$ -- 2
+text.length$ -- 0
+text.prefix$ -- 1
+top$ -- 0
+type$ -- 9
+warning$ -- 0
+while$ -- 0
+width$ -- 2
+write$ -- 13
+(There was 1 warning)

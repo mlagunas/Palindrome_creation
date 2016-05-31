@@ -1,10 +1,13 @@
+#!/usr/bin/env python
 import sys
 
+# Utility function to print how to execute/use the script
 def usage():
 	print "USAGE"
 	print "python palindrome.py text"
 	print "	 text is the list of characters we will transform into a palindrome"
 
+#This functions return true if the input is a palindrome, false otherwise
 def isPalindrome(input):
  	return str(input) == str(input)[::-1]
 
@@ -13,29 +16,29 @@ def isPalindrome(input):
 # the given input
 def lps(input):
 	# initialize with 1 for length 1
-	n = len(word) + 1
-	num_chars = [[0]*n,[1]*(n-1)] + [[None]*(n-i) for i in range(2, n)]
+	n = len(input) + 1
+	num_chars = [[0]*n,[1]*(n)] + [[None]*(n) for i in range(2, n)]
+	#num_chars = [[0]*n,[1]*(n-1)] + [[None]*(n-i) for i in range(2, n)]
 
 	for i in range(2, n): #word length from 2 to len(word)
 		for j in range(n - i):
-			if word[j] == word[j + i - 1]:
+			if input[j] == input[j + i - 1]:
 				num_chars[i][j] = num_chars[i-2][j+1] + 2
 			else:
 				a = num_chars[i-1][j]
 				b = num_chars[i-1][j+1]
 				if a > b : num_chars[i][j] = a
 				else: num_chars[i][j] = b
-
 	# build the solution
 	palindrome = []
 	mirror = ''
 	j = 0
 	for i in range(n-1, 0, -1):
-		if word[j] == word[j + i - 1]:
+		if input[j] == input[j + i - 1]:
 			if i == 1:
-				mirror = word[j]
+				mirror = input[j]
 			else:
-				palindrome.append(word[j])
+				palindrome.append(input[j])
 				if i == 2:
 					break
 			j += 1
@@ -49,7 +52,7 @@ def lps(input):
 # every step it takes to generate it
 def makePalindrome(input, before = "", ops = 0):
 	if isPalindrome(input):
-		print "Number of operations -- 0")
+		print "Number of operations -- 0"
 		print "Input string -- " +input
 		print "Final result -- " + input
 	elif len(input)%2==0:

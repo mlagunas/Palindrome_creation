@@ -1,0 +1,9 @@
+\begin{thebibliography}{\uppercase{Wik}}
+
+\bibitem[Wik]{lcs}
+\textsc{Wikipedia}:
+\newblock \emph{Longest common subsequence problem}.
+\newblock
+  \url{https://en.wikipedia.org/wiki/Longest_common_subsequence_problem}.
+
+\end{thebibliography}
