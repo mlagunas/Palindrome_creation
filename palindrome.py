@@ -63,7 +63,7 @@ def makeIt(strL, strR, mid_chars, offsetL="", offsetR="", res = "", pos = 1, com
 			else:
 				res += strL[0]
 				string =  offsetL + strL + mid_chars + (res + strR)[::-1] + offsetR
-				comment = "Insert '" +strL[0]+ "' on pos " + str(pos+len(mid_chars)) +" -- "+ string
+				comment = "Insert '" +strL[0]+ "' on pos " + str(pos+len(mid_chars)+len(offsetL)) +" -- "+ string
 				return comment + '\n' +makeIt(strL[1:], strR, mid_chars, offsetL, offsetR, res, pos +1, comments+1)
 		elif len(strR) > len(strL):
 			if strL[0] == strR[0]:
@@ -83,7 +83,7 @@ def makeIt(strL, strR, mid_chars, offsetL="", offsetR="", res = "", pos = 1, com
 		if len(strL) > len(strR):
 			res += strL[0]
 			string = offsetL + strL + mid_chars + (res + strR)[::-1] + offsetR
-			comment = "Insert '" +strL[0]+ "' on pos " + str(pos+len(mid_chars)) +" -- "+ string
+			comment = "Insert '" +strL[0]+ "' on pos " + str(pos+len(mid_chars)+len(offsetL)) +" -- "+ string
 			return comment + '\n' + makeIt(strL[1:], strR, mid_chars, offsetL, offsetR, res, pos +1, comments+1)
 		elif len(strR) > len(strL):
 			res += strR[0]
@@ -100,32 +100,28 @@ def preMake(input, offsetL="", offsetR=""):
 		#  If an input has repeated characters,
 	#  use them to reduce the number of insertions
 	elif len(repeated) > 0:
-		ch = repeated[0]
-		shortestResult = ""
-		shortestNumber = 99999999999999999
-		shortestText = ""
 
-		# find boundaries
-		chpos = find(input, ch)
-		iLeft = chpos[0] # "program" -> 1
-		iRight = chpos[len(chpos)-1] # "program" -> 4
+		for ch in repeated: #"program" -> { 'r' }
+			# find boundaries
+			chpos = find(input, ch)
+			iLeft = chpos[0] # "program" -> 1
+			iRight = chpos[len(chpos)-1] # "program" -> 4
 
-		right = input[iRight+1:] # "program" -> "am"
-		rightRev = right[::-1] # "program" -> "ma"
+			right = input[iRight+1:] # "program" -> "am"
+			rightRev = right[::-1] # "program" -> "ma"
 
-		left = input[:iLeft] # "program" -> "p"
-		leftRev = left[::-1] # "p" -> "p"
+			left = input[:iLeft] # "program" -> "p"
+			leftRev = left[::-1] # "p" -> "p"
 
-		# make a palindrome of the inside chars
-		inside = input[iLeft + 1 : iRight] # "program" -> "og"
-		x = preMake(inside, left+ch, ch+right)
-		t, n, insidePal = x # "og" -> "ogo"
+			# make a palindrome of the inside chars
+			inside = input[iLeft + 1 : iRight] # "program" -> "og"
+			x = preMake(inside, left+ch, ch+right)
+			t, n, insidePal = x # "og" -> "ogo"
 
-		text, number, result = makeIt(left, right, ch+insidePal+ch, offsetL, offsetR).split("|")
-		number = int(number)
-		text = text
-		number += int(n)
-		print n, number
+			text, number, result = makeIt(left, right, ch+insidePal+ch, offsetL, offsetR).split("|")
+			number = int(number)
+			text = t + text
+			number += int(n)
 
 		return text, number, result
 	else:
