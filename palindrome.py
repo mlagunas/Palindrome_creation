@@ -18,7 +18,6 @@ def dynamic_programming(n_steps, method_values = None):
 		return method_values[n_steps-1] + method_values[n_steps-2];
 
 dynamic_programming(6)
-DEBUG = False
 
 def find(lst, char):
 	t = []
@@ -36,7 +35,7 @@ def repeatedChar(input):
 	for char in input:
 		if char in d:
 			d[char] += 1
-			if (d[char]%2 == 0 and d[char] > maxcount):
+			if (d[char] > maxcount):
 				maxcount = d[char]
 		else:
 			d[char] = 1
@@ -46,108 +45,130 @@ def repeatedChar(input):
 
 	return chars;
 
-def makeIt(strL, strR, mid_chars, offsetL="", offsetR="", res = "", pos = 1):
+def makeItDin(strL, strR, method_values = None):
+	if strL[0] != strR[0]:
+		return strL[0]
+	elif len(strL) > len(strR):
+		return strL[0]:
+
+	else:
+		if len(strL)>len(strR) in method_values:
+			method_values[strL-1+strR] = makeItDin(strL[1:], strR, method_values)
+
+def makeIt(strL, strR, mid_chars, offsetL="", offsetR="", res = "", pos = 1, comments = 0):
 	if len(strR) > 0 and len(strL) > 0:
 		if len(strL) > len(strR):
 			if strL[0] == strR[0]: #Equal value, add to the result and go ahead
-				return makeIt(strL[1:], strR[1:], mid_chars, offsetL, offsetR, res + strL[0], pos+1)
+				return makeIt(strL[1:], strR[1:], mid_chars, offsetL, offsetR, res + strL[0], pos+1, comments)
 			else:
 				res += strL[0]
 				string =  offsetL + strL + mid_chars + (res + strR)[::-1] + offsetR
-				print "Insert '" +strL[0]+ "' on pos " + str(pos+len(mid_chars)) +" -- "+ string
-				return makeIt(strL[1:], strR, mid_chars, offsetL, offsetR, res, pos +1)
+				comment = "Insert '" +strL[0]+ "' on pos " + str(pos+len(mid_chars)) +" -- "+ string
+				return comment + '\n' +makeIt(strL[1:], strR, mid_chars, offsetL, offsetR, res, pos +1, comments+1)
 		elif len(strR) > len(strL):
 			if strL[0] == strR[0]:
-				return makeIt(strL[1:], strR[1:], mid_chars, offsetL, offsetR, res + strL[0], pos+1)
+				return makeIt(strL[1:], strR[1:], mid_chars, offsetL, offsetR, res + strL[0], pos+1, comments)
 			else:
 				res += strR[0]
 				string = offsetL + res + strL + mid_chars + (res + strR[1:])[::-1] + offsetR
-				print "Insert '" +strR[0]+ "' on pos " + str(len(offsetL)+pos)  +" -- "+ string
-				return makeIt(strL, strR[1:], mid_chars, offsetL, offsetR, res, pos +1)
+				comment = "Insert '" +strR[0]+ "' on pos " + str(len(offsetL)+pos)  +" -- "+ string
+				return comment + '\n' + makeIt(strL, strR[1:], mid_chars, offsetL, offsetR, res, pos +1, comments+1)
 		if strL[0] != strR[0]:
 			string = offsetL + res + strR[0] + strL[1:] + mid_chars + (res + strR)[::-1] + offsetR
-			print "Change pos '" +str(len(offsetL)+pos)+ "' for " +strR[0]+ " -- " + string
-			return makeIt(strL[1:], strR[1:], mid_chars, offsetL, offsetR, res + strR[0], pos +1)
+			comment = "Change pos '" +str(len(offsetL)+pos)+ "' for " +strR[0]+ " -- " + string
+			return comment + '\n' + makeIt(strL[1:], strR[1:], mid_chars, offsetL, offsetR, res + strR[0], pos +1, comments+1)
 		if strL[0] == strR[0]:
-			return makeIt(strL[1:], strR[1:], mid_chars, offsetL, offsetR, res + strL[0], pos+1)
+			return makeIt(strL[1:], strR[1:], mid_chars, offsetL, offsetR, res + strL[0], pos+1, comments)
 	else:
 		if len(strL) > len(strR):
 			res += strL[0]
 			string = offsetL + strL + mid_chars + (res + strR)[::-1] + offsetR
-			print "Insert '" +strL[0]+ "' on pos " + str(pos+len(mid_chars)) +" -- "+ string
-			return makeIt(strL[1:], strR, mid_chars, offsetL, offsetR, res, pos +1)
+			comment = "Insert '" +strL[0]+ "' on pos " + str(pos+len(mid_chars)) +" -- "+ string
+			return comment + '\n' + makeIt(strL[1:], strR, mid_chars, offsetL, offsetR, res, pos +1, comments+1)
 		elif len(strR) > len(strL):
 			res += strR[0]
 			string = offsetL + res + strL + mid_chars + (res + strR[1:])[::-1] + offsetR
-			print "Insert '" +strR[0]+ "' on pos " + str(len(offsetL)+pos)  +" -- "+ string
-			return makeIt(strL, strR[1:], mid_chars, offsetL, offsetR, res, pos +1)
+			comment = "Insert '" +strR[0]+ "' on pos " + str(len(offsetL)+pos)  +" -- "+ string
+			return comment + '\n' + makeIt(strL, strR[1:], mid_chars, offsetL, offsetR, res, pos +1, comments+1)
 		else:
-			return res + mid_chars + res[::-1]
+			return "|" + str(comments) +"|"+ res + mid_chars + res[::-1]
 
 def preMake(input, offsetL="", offsetR=""):
 	repeated = repeatedChar(input)
-
 	if isPalindrome(input) or len(input) == 0:
-		return input;
+		return "",0,input;
 		#  If an input has repeated characters,
 	#  use them to reduce the number of insertions
 	elif len(repeated) > 0:
+		ch = repeated[0]
 		shortestResult = ""
-		for ch in repeated: #"program" -> { 'r' }
-			# find boundaries
-			chpos = find(input, ch)
-			iLeft = chpos[0] # "program" -> 1
-			iRight = chpos[len(chpos)-1] # "program" -> 4
+		shortestNumber = 99999999999999999
+		shortestText = ""
 
-			right = input[iRight+1:] # "program" -> "am"
-			rightRev = right[::-1] # "program" -> "ma"
+		# find boundaries
+		chpos = find(input, ch)
+		iLeft = chpos[0] # "program" -> 1
+		iRight = chpos[len(chpos)-1] # "program" -> 4
 
-			left = input[:iLeft] # "program" -> "p"
-			leftRev = left[::-1] # "p" -> "p"
+		right = input[iRight+1:] # "program" -> "am"
+		rightRev = right[::-1] # "program" -> "ma"
 
-			# make a palindrome of the inside chars
-			inside = input[iLeft + 1 : iRight] # "program" -> "og"
-			insidePal = preMake(inside, left+ch, ch+right) # "og" -> "ogo"
+		left = input[:iLeft] # "program" -> "p"
+		leftRev = left[::-1] # "p" -> "p"
 
-			result = makeIt(left, right, ch+insidePal+ch, offsetL, offsetR)
+		# make a palindrome of the inside chars
+		inside = input[iLeft + 1 : iRight] # "program" -> "og"
+		x = preMake(inside, left+ch, ch+right)
+		t, n, insidePal = x # "og" -> "ogo"
 
-			# Shave off extra chars in rightRev and leftRev
-			#   When input = "message", this loop converts "meegassageem" to "megassagem",
-			#     ("ee" to "e"), as long as the extra 'e' is an inserted char
-			# while len(left) > 0 and len(rightRev) > 0 and left[len(left)- 1] == rightRev[0]:
-			# 	rightRev = rightRev[1:]
-			# 	leftRev = leftRev[1:]
-			#
-			# if DEBUG :
-			# 	print "righ " + right
- 			# 	print "left " + left
-			# 	print "ch " + ch
-			# 	print "righR " + rightRev
- 			# 	print "inside pal " + insidePal
-			# 	print "leftRev "+ leftRev
+		text, number, result = makeIt(left, right, ch+insidePal+ch, offsetL, offsetR).split("|")
+		number = int(number)
+		text = text
+		number += int(n)
+		print n, number
 
-			# piece together the result
-			# result = left + rightRev + ch + insidePal + ch + right + leftRev
-
-			# find the shortest result for inputs that have multiple repeated characters
-			if shortestResult == "" or len(result) < len(shortestResult):
-				shortestResult = result
-		return shortestResult
+		return text, number, result
 	else:
-		# For inputs that have no repeated characters,
-		# just mirror the characters using the last character as the pivot.
-		# for i in range(len(input)-2,-1, -1):
-		# 	print "Add " + str(input[i])+ " in position " +str(i)+ " -> " + str(input + input[i])
-		# 	input += input[i]
 		if len(input)%2 == 0:
-			input = makeIt(input[:len(input)/2], input[len(input)/2], "", offsetL, offsetR)
+			text, number, input = makeIt(input[:len(input)/2], input[len(input)/2], "", offsetL, offsetR).split("|")
 		else:
-			input = makeIt(input[:len(input)/2], input[len(input)/2+1:], input[len(input)/2], offsetL, offsetR)
-		return input
+			text, number, input = makeIt(input[:len(input)/2], input[len(input)/2+1:], input[len(input)/2], offsetL, offsetR).split("|")
+		return text, number, input
 
 def MakePalindrome(input):
-	print "Input -- " + input
-	palindrome = preMake(input)
-	print "Result -- " + palindrome
+	text = preMake(input)
+	print "Minimum number -- " + str(text[1])
+	print "Input text -- " + input
+	print text[0]
+	print "Result -- " + text[2]
 
-MakePalindrome("program")
+makeIt("st", "asdfgh","")
+makeIt("st", "asdfgh","").split("|")[0]
+makeIt("st", "asdfgh","").split("|")[1]
+makeIt("st", "asdfgh","").split("|")[2]
+a,b,c = (1,2,3)
+str(preMake("holo"))
+MakePalindrome("holo")
+MakePalindrome("stackexchange")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+makeIt("asdasd","fgh","")
+MakePalindrome("stackexchange")
