@@ -1,6 +1,6 @@
 # Palindrome creation
 Code developed for educational purposes during the course Basic algorithms at the university of Zaragoza. This repository has
-implemented a basic palindrome creator with dynamic programming. It is based on the largest palindromic subsequence problem.
+implemented a basic palindrome creator with the dynamic programming technique. It is based on the largest palindromic subsequence problem (LPS).
 
 ## USAGE
 
