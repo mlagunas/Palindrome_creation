@@ -41,7 +41,7 @@
 \maketitle
 
 \begin{abstract}
-El siguiente documento contiene la información referente a la práctica 2 de la asignatura de Algoritmia básica. El objetivo de esta es calcular el coste entendido como inserciones, borrados o cambios de letras en una cadena para crear un palindromo. Las siguientes lineas exponen la estrategia seguida para su desarrollo asi como las decisiones tomadas. El código ha sido desarrollado por el propio autor de este documento.
+El siguiente documento contiene la información referente a la práctica 2 de la asignatura de Algoritmia básica. El objetivo de esta es calcular el coste entendido como inserciones, borrados o cambios de letras en una cadena para crear un palíndromo. Las siguientes lineas exponen la estrategia seguida para su desarrollo asi como las decisiones tomadas. El código ha sido desarrollado por el propio autor de este documento.
 
 En el documento se usa $len(x)$ para hacer referencia a la longitud de $x$.
 
@@ -49,117 +49,117 @@ El código se encuentra disponible de manera abierta en : {\url{https://github.c
 \end{abstract}
 
 %-------------------------------------------------------------------------
-\section{Mayor subsecuencia palindrómica}
-Para el desarrollo del algóritmo global se ha seguido una estrategía que parte del resultado de la mayor subsecuencia palindrómica de la cadena de entrada. \cite{lcs} Se ha seguido una estrategia de programación dinámica para abordar el problema. Los sub-resultados del método se han almacenado en una matriz de dimensiones $n+1*n+1 | n=len(cadena)$, la primera fila estará inicializada a 0, la segunda a 1 y la tercera con $nil$. Para una entrada  \textit{alg} se generará una estructura como la tabla 1.
+\section{Menor distancia de edición}
+Para obtener un palíndromo dada una palabra, esta tiene que ser transformada de manera que su primera mitad sea igual a la segunda pudiendo existir un carácter intermedio. Para transformar una palabra en otra se ha hecho uso de la mínima distancia de edición considerando la posibilidad de añadir, borrar o intercambiar caracteres e introduciendo como entrada dos subcadenas de la palabra en cuestión. Para ello se ha empleado el algoritmo de Levenshtein\footnote{Teoría usada: https://web.stanford.edu/class/cs124/lec/med.pdf}. La matriz empleada para guardar las sub soluciones del problema tiene el tamaño de las longitudes de las cadenas de entrada más uno $DP=[len(str1)+1] [len(str2)+1]$ considerando la primera fila y columna como la cadena vacía cuyo valor será $len(str2_j)$ si $i=0$ y $len(str1_i)$ si $j=0$. El resto de posiciones $(i,j)$ almacenan la mínima distancia de edición para las subcadenas $str1_i$ y $str2_j$. El resultado final se encontrará en la posición $[len(str1)] [len(str2)]$ (se considera la primera posición con indice 0). Teniendo la fila y columnas de índice 0 con su resultado ya obtenido habrá que continuar calculando el resto. Para ello se tienen en cuenta las tres operaciones, sabiendo que cada índice de la matriz está representando una subcadena de las cadenas de entrada se puede deducir que los cambios en el eje x representan inserciones, mientras que los cambios en el eje y serán borrados. Si se considera la diagonal serán sustituciones si su valor es mayor al actual o se mantendrán las mismas cadenas de caracteres si su valor es el mismo. Para poder rellenar la matriz, será necesario comparar entonces los resultados obtenidos anteriormente para obtener el mínimo coste posible teniendo la siguiente fórmula:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=.95\linewidth]{levenstein.png}
+\caption{Fórmula de la distancia de Levenshtein. Imágen obtenida de wikipedia.}
+\end{figure}
+
+Tras acabar el proceso se obtiene una matriz con las mismas características que la que se muestra a continuación. Dado el proceso y su necesidad de almacenar la información relativa a todas las subcadenas posibles para su reconstrucción, el coste asintótico tanto en espacio como en tiempo es $O(n^2)$, aunque es posible realizar con coste $O(n)$ en espacio siendo $n$ la longitud de la cadena más larga. Para realizarlo de esta forma se irán actualizando los valores sobre el mismo vector perdiendo los previamente calculados, por ello, no es viable con esta solución.
+ \begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+ &\_&p&a&l&i&n\\
+ \hline
+\_& 0& 1& 2& 3& 4& 5\\
+ \hline
+o&  1& 1& 2& 3& 4& 5\\
+\hline
+m&  2& 2& 2& 3& 4& 5\\
+  \hline
+o&  3& 3& 3& 3& 4& 5\\
+  \hline
+r&  4& 4& 4& 4& 4& 5\\
+  \hline
+d&  5& 5& 5& 5& 5& 5\\
+\hline
+\end{tabular}
+\caption{Ejemplo de matriz con las mínimas distancias de edición.}
+\end{table}
+
+\subsection{Reconstruyendo las operaciones}
+Una vez se ha obtenido la tabla con los cálculos de cada subproblema, obteniendo también la mínima distancia de edición será necesario reconocer los pasos realizados con el fin de poder modificar la palabra de entrada hasta que sea un palíndromo. Para ello, de nuevo hay que recordar que los cambios en el eje $y$ son borrados y en el eje $x$ inserciones mientras que las diagonales, dependiendo de su valor, son reemplazamientos o simplemente se mantiene como estaba. Se comienza en la posición de la esquina inferior derecha (donde se obtiene la mínima distancia de edición) y se comparan el valor de las inserciones, borrados y reemplazamientos o mantenerlo obteniendo el mínimo, que será la operación realizada. Se debe iterar hasta alcanzar la posición de inicio (0,0), punto en el que se obtiene las instrucciones a realizar, pudiendo existir más de un camino válido. El algoritmo usado almacena una letra para cada operación correspondiendo la S a sustituciones, A a añadir y D a borrados, si se encuentra un espacio en blanco se indicará que el carácter debe permanecer como estaba, teniendo al final una cadena con longitud igual al número de pasos a realizar.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{|c|c|c|c|}
+\begin{tabular}{|c|c|c|c|c|c|c|}
 \hline
-0&0&0&0\\
+&\_&p&a&l&i&n\\
 \hline
-1&1&1&1\\
+\_& \textit{\textbf{0}}& 1& 2& 3& 4& 5\\
 \hline
-nil&nil&nil&nil\\
+o&  1& \textit{\textbf{1}}& 2& 3& 4& 5\\
 \hline
-nil&nil&nil&nil\\
-\hline
-\end{tabular}
-\caption{Inicialización de la estructura de datos que guarda las sub-ejecuciones de la función para calcular la subsequencia palindrómica más larga}
-\end{table}
-
-\subsection{Algoritmo}
-Una vez la tabla esta inicializada se iterará sobre dos bucles que la recorreran, el primer índice \textit{i} comienza en la posicion $2$ hasta $len(cadena)$, el segundo, \textit{j} tendrá valor $0$ hasta $i$ (se entiende que el bucle \textit{i} es el que contiene el bucle \textit{j}). Dentro del bucle se compararán posiciones contiguas de los carácteres de la cadena de entrada de manera que si ambos son iguales se actualice la posicion de la tabla \textit{i}, \textit{j} para que su valor sea $[i-2,j+1] +2$ dada la inicialización de la tabla este valor será 1 en la primera ejecución ($j=0$ y busca en $j+1$, la primera fila se inicializa en 1s) al que debemos sumar 2 dado que hemos encontrado en la cadena 2 carácteres iguales $len(subsecuencia) = carácteres_añadidos + len(subsecuencia-cáracteres_añadidos)$. El coste asíntotico de dicho bucle será la multiplicación del coste da cada uno, que podemos aproximar a $O(n^2)$. 
-
-El hecho de que la tabla disponga de esa fila de 1s en la segunda fila es debido a que lo que se busca en la subsequencia palíndromica con mayor número de elementos, esto implica que ese resultado seá impar siempre (el número de elementos de la subsecuencia), dado que si esta es par indicá que tiene parejas de carácteres a los que se les puede añadir uno en medio sin alterar el resultado. La fila con ceros es necesaria para comenzar la ejecución sin errores y podría ser un resultado si no buscaramos la subsequencia más larga. Tras acabar las iteraciones encontramos en la última fila, en la primera posición el resultado del tamaño de dicha cadena tal y como puede verse en la tabla 2.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{|c|c|c|c|c|}
-\hline
-0&0&0&0&0\\
-\hline
-1&1&1&1&1\\
-\hline
-1&1&1&nil&nil\\
-\hline
-3&3&nil&nil&nil\\
-\hline
-3&nil&nil&nil&nil\\
+m&  2& 2& \textit{\textbf{2}}& 3& 4& 5\\
+ \hline
+o&  3& 3& 3& \textit{\textbf{3}}& 4& 5\\
+ \hline
+r&  4& 4& 4& 4& \textit{\textbf{4}}& 5\\
+ \hline
+d&  5& 5& 5& 5& 5& \textit{\textbf{5}}\\
 \hline
 \end{tabular}
-\caption{Tabla con sub-ejecuciones al acabar los bucles anidados. Se observa el resultado en la posición de la última fila, primera columna. La tabla esta medio vacia por optimizaciones a la hora de ejecutar el algoritmo, pues si tienes una palabra no es necesario volver a comparar su segunda mitad con la primera, pues ya estaba hecho antes.}
+\caption{Camino seguido para la obtención de las operaciones realizadas, que en este caso son 5 reemplazos de caracteres. No tiene porque ser la diagonal siempre}
 \end{table}
 
-\subsection{Generar la subsecuencia}
-Para ahora obtener un resultado que nos devuelva la subsequencia palindrómica que buscamos tendremos que volver a recorrer la entrada una sola vez, y por tanto, con coste lineal $O(n)$. El bucle se ejecutara de la parte final de la cadena al comienzo, además tendremos un elemento \textit{w} que apuntara al principio, de manera que podamos comparar carácteres dos a dos y añadirlos al palindromo si estos coinciden. Durante el bucle \textit{w} solo se actualizará en el momento que los dos caráctares comparandose no coincidan y se compruebe en la tabla de sub-ejecuciones que la posición en la misma columna pero en la fila inferior es mayor (mayor número de elemntos en esa sub-ejecución, esto controlará los elementos que debemos añadir al palindromo). Tras acabar esta ejecución el método devolverá tanto el número de carácteres, como el palíndromo.
+% \subsection{Generar la subsecuencia}
+% Para ahora obtener un resultado que nos devuelva la sub secuencia palindrómica que buscamos tendremos que volver a recorrer la entrada una sola vez, y por tanto, con coste lineal $O(n)$. El bucle se ejecutara de la parte final de la cadena al comienzo, además tendremos un elemento \textit{w} que apuntará al principio, de manera que podamos comparar caracteres dos a dos y añadirlos al palíndromo si estos coinciden. Durante el bucle \textit{w} solo se actualizará en el momento que los dos caracteres comparándose no coincidan y se compruebe en la tabla de sub-ejecuciones que la posición en la misma columna pero en la fila inferior es mayor (mayor número de elementos en esa sub-ejecución, esto controlará los elementos que debemos añadir al palíndromo). Tras acabar esta ejecución el método devolverá tanto el número de caracteres, como el palíndromo.
 
-\section{Obtención del palindromo}
-Una vez se tiene la palabra de entrada y su mayor subsecuencia palindrómica, es inmediato calcular el número de operaciones necesarias, que será $len(entrada) - len(subsecuencia)$. Se conoce que los elementos de la subsecuencia palindrómica estan contenidos en la entrada, por lo tanto habra que iterar sobre los elementos de esta, con un coste $O(n)$, mirando cuales se encuentran en la entrada y eleminando los elementos que no pertenezcan a esta. Existe un caso particular en la ejecución, en el cual los elementos que quedan por observar de la secuencia palindrómica en la entrada son mayores que los elementos que hay en la entrada, en ese caso en vez de borrar elementos habrá que hacer un cambio de los elementos que queden en la entrada por los elementos de la subsecuencia palindrómica, haciendo que el resultado sea algo más eficiente en cuanto a pasos a dar para obtener el palíndromo final. 
+\section{Obtención del palíndromo}
+Se tienen las operaciones realizadas como una cadena de caracteres, ahora el siguiente paso será aplicarlas a la primera subcadena de manera que esta se transforme y se obtenga un palíndromo. Para ello simplemente se leen las operaciones en orden inverso (están ordenadas de ultimo a primero) aplicándolas a la primera subcadena, teniendo en cuenta el valor de los índices en operaciones como añadir o borrar para que apunten al carácter en cuestión de ambas. Al acabar la transformación la cadena de entrada se habrá convertido en un palindromo
 
 \section{Resultados}
-El agoritmo desarrollado no es el que devuelve el resultado óptimo, sino que devuelve una aproximación a este. El trabajo fúturo a desarrollar sería continuar haciendo que el resultado obtenido se optimice de acuerdo a el número de movimientos a realizar, haciendo uso de algoritmos como la distancia de Levenshtein \cite{distancia}.
+  Con el fin de obtener la mínima distancia de edición para crear el palíndromo se han probado todas las posibles subcadenas de la palabra inicial quedándonos tan solo con la configuración que devuelve el menor numero de pasos en la distancia de edición. Obteniendo los siguientes resultados:
+
 \begin{figure}[h]
 \centering
 \begin{BVerbatim}
-Number of operations -- 1
-Input string -- mannaam
-Delete pos 6 -- mannam
-Final result: mannam
-'mannam'
 
-Number of operations -- 10
-Input string -- algoritmia basica
-Delete pos 2 -- agoritmia basica
-Delete pos 2 -- aoritmia basica
-Delete pos 2 -- aritmia basica
-Delete pos 2 -- aitmia basica
-Delete pos 3 -- aimia basica
-Delete pos 3 -- aiia basica
-Delete pos 6 -- aiia asica
-Delete pos 7 -- aiia aica
-Change pos 8 for i -- aiia aiia
-Final result: aiia aiia
-'aiia aiia'
+Numero minimo: 8
+Cadena original: algoritmia basica
+Cambiar pos 2 por c: acgoritmia basica
+Cambiar pos 3 por i: acioritmia basica
+Cambiar pos 4 por s: acisritmia basica
+Cambiar pos 5 por a: acisaitmia basica
+Añadir b en pos 5: acisabitmia basica
+Añadir   en pos 6: acisab itmia basica
+Añadir a en pos 7: acisab aitmia basica
+Cambiar pos 10 por m: acisab aimmia basica
+acisab aimmia basica
+es Palindromo? True
 
-Input string -- Esto es una cadena larga
-Number of operations -- 17
-Add a in pos 0 -- aEsto es una cadena larga
-Delete pos 2 -- asto es una cadena larga
-Delete pos 2 -- ato es una cadena larga
-Delete pos 2 -- ao es una cadena larga
-Delete pos 2 -- a es una cadena larga
-Delete pos 3 -- a s una cadena larga
-Delete pos 3 -- a  una cadena larga
-Delete pos 4 -- a  na cadena larga
-Delete pos 7 -- a  na adena larga
-Delete pos 8 -- a  na aena larga
-Delete pos 8 -- a  na ana larga
-Delete pos 9 -- a  na an larga
-Delete pos 10 -- a  na an arga
-Delete pos 10 -- a  na an rga
-Delete pos 10 -- a  na an ga
-Change pos 10 for   -- a  na an  a
-Final result: a  na an  a
+Numero minimo: 11
+Cadena original: Esto es una cadena larga
+Cambiar pos 1 por a: asto es una cadena larga
+Cambiar pos 2 por g: agto es una cadena larga
+Cambiar pos 3 por r: agro es una cadena larga
+Cambiar pos 4 por a: agra es una cadena larga
+Añadir l en pos 4: agral es una cadena larga
+Cambiar pos 7 por a: agral as una cadena larga
+Cambiar pos 8 por n: agral an una cadena larga
+Cambiar pos 9 por e: agral aneuna cadena larga
+Cambiar pos 10 por d: agral anedna cadena larga
+Borrar posición 11: agral aneda cadena larga
+Cambiar pos 13 por c: agral anedaccadena larga
+agral anedaccadena larga
+es Palindromo? True
 
-Number of operations -- 5
-Input string -- 12342331234
-Delete pos 1 -- 2342331234
-Delete pos 1 -- 342331234
-Delete pos 2 -- 32331234
-Delete pos 5 -- 3233234
-Delete pos 7 -- 323323
-Final result: 323323
-'323323'
+Numero minimo: 4
+Cadena original: 12342331234
+Cambiar pos 1 por 4: 42342331234
+Borrar posición 2: 4342331234
+Borrar posición 4: 432331234
+Añadir 1 en pos 5: 4321331234
+4321331234
+es Palindromo? True
+
 \end{BVerbatim}
-\caption{Ejemplos de ejecución del algoritmo desarrollado}
 \end{figure}
 %-------------------------------------------------------------------------
-
-%\bibliographystyle{eg-alpha}
-\bibliographystyle{eg-alpha-doi}
-
-\bibliography{egbibsample}{}
 
 %-------------------------------------------------------------------------
 

@@ -1,91 +1,150 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Author; Manuel Lagunas
+# 3/9/2016
+# Readable code implementing huffman compression/decompression
 import sys
+import numpy
 
-# Utility function to print how to execute/use the script
+
 def usage():
-	print "USAGE"
-	print "python palindrome.py text"
-	print "	 text is the list of characters we will transform into a palindrome"
+    print "USAGE"
+    print "python palindrome.py text"
+    print "	 \"text\" is the list of characters we will transform into a palindrome"
 
-#This functions return true if the input is a palindrome, false otherwise
+# This functions return true if the input is a palindrome, false otherwise
+
+
 def isPalindrome(input):
- 	return str(input) == str(input)[::-1]
+    return str(input) == str(input)[::-1]
 
-# A Dynamic Programming based Python program for LPS problem
-# returns the length of the longest palindromic subsequence (LPS) in
-# the given input
-def lps(input):
-	# initialize with 1 for length 1
-	n = len(input) + 1
-	num_chars = [[0]*n,[1]*(n)] + [[None]*(n) for i in range(2, n)]
-	#num_chars = [[0]*n,[1]*(n-1)] + [[None]*(n-i) for i in range(2, n)]
+# The function fills an matrix with the minimum edit distance to transform a string x to y.
+# Each position in the matrix precomputes the minimum edit distance for
+# the substring x_i y_j
 
-	for i in range(2, n): #word length from 2 to len(word)
-		for j in range(n - i):
-			if input[j] == input[j + i - 1]:
-				num_chars[i][j] = num_chars[i-2][j+1] + 2
-			else:
-				a = num_chars[i-1][j]
-				b = num_chars[i-1][j+1]
-				if a > b : num_chars[i][j] = a
-				else: num_chars[i][j] = b
-	# build the solution
-	palindrome = []
-	mirror = ''
-	j = 0
-	for i in range(n-1, 0, -1):
-		if input[j] == input[j + i - 1]:
-			if i == 1:
-				mirror = input[j]
-			else:
-				palindrome.append(input[j])
-				if i == 2:
-					break
-			j += 1
-		elif num_chars[i-1][j] < num_chars[i-1][j+1]:
-			j += 1
-	return num_chars[-1][0], ''.join(palindrome) + mirror + ''.join(reversed(palindrome))
 
-# It generates a new palindrome from a given input. It uses the
-# logest palindromic subsequence to calculate it. The algorithm
-# reduces the input until it has the same form as the lps. It prints
-# every step it takes to generate it
-def makePalindrome(input, before = "", ops = 0):
-	if isPalindrome(input):
-		print "Number of operations -- 0"
-		print "Input string -- " +input
-		print "Final result -- " + input
-	elif len(input)%2==0:
-		print "Input string -- " +input
-		input = input[len(input)-1] + input
-		makePalindrome(input,  "Add " + input[len(input)-1] + " in pos " + str(0) + " -- "+ input, ops+1)
-	else:
-		lpsNum, lpsRes = lps(input)
-		print "Number of operations -- " +str(len(input) - lpsNum + ops)
-		if before != "":
-			print before
-		else:
-			print "Input string -- " +input
-		j = 0
-		i = 0
-		for c in input:
-			if j != len(lpsRes) and c == lpsRes[j]:
-				j+= 1
-				i+= 1
-			else:
-				if len(input)-i<=len(lpsRes)-j:
-					input = input[:i] +lpsRes[j]+ input[i+1:]
-					print "Change pos " + str(i+1) + " for "+lpsRes[j]+" -- "+ input
-					i+=1
-					j+=1
-				else:
-					input = input[:i] + input[i+1:]
-					print "Delete pos " + str(i+1) + " -- "+ input
-		print "Final result: " + input
-		return input
+def edDistDp(x,	y):
+    D = numpy.zeros((len(x) + 1, len(y) + 1), dtype=int)
+    # if x is empty the minimum distance must be the lenght of y
+    D[0, 1:] = range(1, len(y) + 1)
+    # if y is empty the minimum distance must be the lenght of x
+    D[1:, 0] = range(1, len(x) + 1)
+    for i in xrange(1,	len(x) + 1):
+        for j in xrange(1,	len(y) + 1):
+            delt = 1 if x[i - 1] != y[j - 1] else 0
+            insert = D[i][j - 1]
+            remove = D[i - 1][j]
+            replace = D[i - 1][j - 1]
+            D[i, j] = min(replace + delt,
+                          remove + 1,
+                          insert + 1)
+    return D
 
-if len(sys.argv) == 2 :
-	text = sys.argv[1]
-	makePalindrome(text)
+# This function reads back the DP matrix with the minimum edit distances,
+# storing the operation used.
+
+
+def backtrace(a, b, D):
+    i, j = len(a), len(b)
+    result = ""
+    indices = []
+    while(not (i == 0 and j == 0)):
+        indices.append([i, j, D[i, j]])
+        # Get edit distance for the substrings x_i y_j
+        last = D[i][j]
+        # Get the operation that returns the minimum edit distance
+        insert = D[i][j - 1]
+        remove = D[i - 1][j]
+        replace = D[i - 1][j - 1]
+        aux = min(insert,
+                  remove,
+                  replace)
+        if(aux == last):  # Characters are the same
+            i, j = i - 1, j - 1
+            result += ' '
+        elif(i != 0 and aux == remove):
+            i, j = i - 1, j
+            result += 'D'
+        elif(j != 0 and aux == insert):
+            i, j = i, j - 1
+            result += 'A'
+        elif(i != 0 and j != 0 and aux == replace):
+            i, j = i - 1, j - 1
+            result += 'S'
+    return result[::-1], indices
+
+# This function creates all the possible substrings from a string and
+# checks their minimum edit distance storing the minimum value together
+# with the substrings
+
+
+def getSmallestED(entrada):
+    mined = -1
+    minD = None
+    mina = ''
+    minb = ''
+    for i in range(len(entrada)):
+        # Slice string
+        a = entrada[:i]
+        b = entrada[i:]
+        D = edDistDp(a, b[::-1])
+        # Check if it is the minimum value
+        if D[len(a)][len(b)] < mined or mined == -1:
+            mined = D[len(a)][len(b)]
+            mind = D
+            mina = a
+            minb = b
+    return mina, minb, mind
+
+# The function reads back the string returned by the backtrace of the DP
+# matrix and make the modifications to the characters that need it
+# returning the operations that it has done together with the resulting
+# word and a boolean that will show if it is or not a palindrome
+
+
+def makePalindrome(entrada):
+    a, br, D = getSmallestED(entrada)
+    b = br[::-1]
+    D = edDistDp(a, b)
+    offset = 0
+    S, indices = backtrace(a, b, D)
+    # There are some cases where the last Addition is not necessary, Thats why
+    # it just copy the last character of the first substring (the first of the
+    # second substring) when it can be used as a pivot.
+    if (S[-1] == 'A'):
+        offset = 1
+    print "Numero minimo: " + str(D[len(D) - 1][len(D[0]) - 1] - offset)
+    print "Cadena original: " + entrada
+    a = list(a)
+    x, i, j = 0, 0, 0
+    # Build the new string by reading the operations obtained thanks to the DP
+    # matrix with the minimum edit distance
+    while x < (len(S) - offset):
+        op = S[x]
+        if op == 'S':
+            a[i] = b[j]
+            print "Cambiar pos " + str(i + 1) + " por " + b[j] + ": " + "".join(a) + br
+            i += 1
+            j += 1
+        elif op == 'D':
+            a[i] = ''
+            print "Borrar posición " + str(i + 1) + ": " + "".join(a) + br
+            i += 1
+        elif op == 'A':
+            a.insert(i, b[j])
+            print "Añadir " + b[j] + " en pos " + str(i) + ": " + "".join(a) + br
+            j += 1
+            i += 1
+        else:
+            i += 1
+            j += 1
+        x += 1
+    a = "".join(a)
+    # print a + br
+    # print "es Palindromo?", isPalindrome(a + br)
+
+if len(sys.argv) == 2:
+    text = sys.argv[1]
+    makePalindrome(text)
 else:
-	usage()
+    usage()
